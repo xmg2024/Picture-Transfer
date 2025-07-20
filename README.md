@@ -66,7 +66,7 @@ This repo provides PyTorch Implementation of **[MSG-Net (ours)](#msg-net)** and 
 [Image Style Transfer Using Convolutional Neural Networks](http://www.cv-foundation.org/openaccess/content_cvpr_2016/papers/Gatys_Image_Style_Transfer_CVPR_2016_paper.pdf) by Leon A. Gatys, Alexander S. Ecker, and Matthias Bethge.
 
 ```bash
-python main.py optim --content-image images/content/venice-boat.jpg --style-image images/21styles/candy.jpg
+python main.py optim --content-image images/content/venice-boat.jpg --style-image images/21styles/candy.jpg --output-image my_images/venice_boat_output.jpg
 ```
 * `--content-image`: path to content image.
 * `--style-image`: path to style image.

@@ -26,8 +26,8 @@ from net import Net, Vgg16
 
 from option import Options
 
-#device = torch.device('cuda' if args.cuda and torch.cuda.is_available() else 'cpu')
-device = torch.device('cpu')
+#device = torch.device('cpu')
+device = torch.device('cuda:0')
 
 def main():
     # figure out the experiments type
