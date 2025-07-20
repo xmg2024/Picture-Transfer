@@ -53,6 +53,7 @@ This repo provides PyTorch Implementation of **[MSG-Net (ours)](#msg-net)** and 
 0. Train the model
 	```bash
 	python main.py train --epochs 4
+ 	python main.py train --epochs 4 --style-folder ./images/21styles/ --cuda 0
 	```
 * If you would like to customize styles, set `--style-folder path/to/your/styles`. More options:
 	* `--style-folder`: path to the folder style images.
