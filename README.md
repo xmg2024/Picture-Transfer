@@ -10,8 +10,7 @@ This repo provides PyTorch Implementation of **[MSG-Net (ours)](#msg-net)** and 
  	python -m venv .venv 
  	source .venv/bin/activate
  	pip install -r requirements.txt
- 	cd experiments 
-	bash models/download_model.sh 
+ 	cd experiments  
 	```
 0. Camera Demo
 	```bash
