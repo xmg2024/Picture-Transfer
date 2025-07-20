@@ -5,7 +5,7 @@ This repo provides PyTorch Implementation of **[MSG-Net (ours)](#msg-net)** and 
 ### Stylize Images Using Pre-trained MSG-Net
 0. Download the pre-trained model
 	```bash
-	git clone https://github.com/xmg2024/Picture-Transfer 
+	git clone git@github.com:xmg2024/Picture-Transfer.git
 	cd Picture-Transfer
  	python -m venv .venv 
  	source .venv/bin/activate
