@@ -6,7 +6,11 @@ This repo provides PyTorch Implementation of **[MSG-Net (ours)](#msg-net)** and 
 0. Download the pre-trained model
 	```bash
 	git clone https://github.com/xmg2024/Picture-Transfer
-	cd Picture-Transfer/experiments
+	cd Picture-Transfer
+        python -m venv .venv
+ 	source .venv/bin/activate
+        pip install -r requirements.txt
+        cd experiments
 	bash models/download_model.sh
 	```
 0. Camera Demo
