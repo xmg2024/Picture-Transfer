@@ -17,6 +17,8 @@ This repo provides PyTorch Implementation of **[MSG-Net (ours)](#msg-net)** and 
 0. Test the model
 	```bash
 	python main.py eval --content-image images/content/venice-boat.jpg --style-image images/21styles/candy.jpg --model models/21styles.model --content-size 1024
+	```
+	```bash
 	python main.py eval --content-image images/content/summer.jpg --style-image images/21styles/starry_night.jpg --model models/21styles.model --output-image my_images/summer_output.jpg
 	```
 * If you don't have a GPU, simply set `--cuda=0`. For a different style, set `--style-image path/to/style`.
