@@ -14,7 +14,7 @@ import numpy as np
 import torch
 from PIL import Image
 from torch.autograd import Variable
-from torchfile import load as load_lua
+import torchvision.models as models
 
 from net import Vgg16
 
@@ -92,22 +92,16 @@ def preprocess_batch(batch):
 
 
 def init_vgg16(model_folder):
-    """load the vgg16 model feature"""
-    if not os.path.exists(os.path.join(model_folder, 'vgg16.weight')):
-        if not os.path.exists(os.path.join(model_folder, 'vgg16.t7')):
-            os.system(
-                'wget http://cs.stanford.edu/people/jcjohns/fast-neural-style/models/vgg16.t7 -O ' + os.path.join(model_folder, 'vgg16.t7'))
-        vgglua = load_lua(os.path.join(model_folder, 'vgg16.t7'))
-        vgg = Vgg16()
-        for (src, dst) in zip(vgglua.parameters()[0], vgg.parameters()):
-            dst.data[:] = src
-        torch.save(vgg.state_dict(), os.path.join(model_folder, 'vgg16.weight'))
+    vgg = models.vgg16(pretrained=True).features
+    vgg = vgg.eval()
+    return vgg
 
 
-class StyleLoader():
-    def __init__(self, style_folder, style_size, cuda=True):
+class StyleLoader(object):
+    def __init__(self, style_folder, style_size, device, cuda=True):
         self.folder = style_folder
         self.style_size = style_size
+        self.device = device
         self.files = os.listdir(style_folder)
         self.cuda = cuda
     
@@ -117,8 +111,7 @@ class StyleLoader():
         style = tensor_load_rgbimage(filepath, self.style_size)    
         style = style.unsqueeze(0)
         style = preprocess_batch(style)
-        if self.cuda:
-            style = style.cuda()
+        style = style.to(self.device)
         style_v = Variable(style, requires_grad=False)
         return style_v
 

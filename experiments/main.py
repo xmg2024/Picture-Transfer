@@ -27,6 +27,9 @@ from net import Net, Vgg16
 
 from option import Options
 
+#device = torch.device('cuda' if args.cuda and torch.cuda.is_available() else 'cpu')
+device = torch.device('cpu')
+
 def main():
     # figure out the experiments type
     args = Options().parse()
@@ -69,7 +72,7 @@ def optimize(args):
     # load the pre-trained vgg-16 and extract features
     vgg = Vgg16()
     utils.init_vgg16(args.vgg_model_dir)
-    vgg.load_state_dict(torch.load(os.path.join(args.vgg_model_dir, "vgg16.weight")))
+    # vgg.load_state_dict(torch.load(os.path.join(args.vgg_model_dir, "vgg16.weight")))
     if args.cuda:
         content_image = content_image.cuda()
         style_image = style_image.cuda()
@@ -116,7 +119,7 @@ def train(args):
     else:
         kwargs = {}
 
-    transform = transforms.Compose([transforms.Scale(args.image_size),
+    transform = transforms.Compose([transforms.Resize(args.image_size),
                                     transforms.CenterCrop(args.image_size),
                                     transforms.ToTensor(),
                                     transforms.Lambda(lambda x: x.mul(255))])
@@ -133,13 +136,13 @@ def train(args):
 
     vgg = Vgg16()
     utils.init_vgg16(args.vgg_model_dir)
-    vgg.load_state_dict(torch.load(os.path.join(args.vgg_model_dir, "vgg16.weight")))
+    # vgg.load_state_dict(torch.load(os.path.join(args.vgg_model_dir, "vgg16.weight")))
 
     if args.cuda:
         style_model.cuda()
         vgg.cuda()
 
-    style_loader = utils.StyleLoader(args.style_folder, args.style_size)
+    style_loader = utils.StyleLoader(args.style_folder, args.style_size, device, cuda=args.cuda)
 
     tbar = trange(args.epochs)
     for e in tbar:
@@ -185,8 +188,8 @@ def train(args):
             total_loss.backward()
             optimizer.step()
 
-            agg_content_loss += content_loss.data[0]
-            agg_style_loss += style_loss.data[0]
+            agg_content_loss += content_loss.item()
+            agg_style_loss += style_loss.item()
 
             if (batch_id + 1) % args.log_interval == 0:
                 mesg = "{}\tEpoch {}:\t[{}/{}]\tcontent: {:.6f}\tstyle: {:.6f}\ttotal: {:.6f}".format(
@@ -272,8 +275,7 @@ def fast_evaluate(args, basedir, contents, idx = 0):
     if args.cuda:
         style_model.cuda()
     
-    style_loader = StyleLoader(args.style_folder, args.style_size, 
-        cuda=args.cuda)
+    style_loader = utils.StyleLoader(args.style_folder, args.style_size, device, cuda=args.cuda)
 
     for content_image in contents:
         idx += 1
