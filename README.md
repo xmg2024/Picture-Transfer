@@ -1,6 +1,6 @@
 # Picture-Transfer
 
-This repo provides PyTorch Implementation of **[MSG-Net (ours)](#msg-net)** and **[Neural Style](#neural-style)**.
+This repo provides PyTorch Implementation of **[MSG-Net](#msg-net)** and **[Neural Style](#neural-style)**.
 
 ### Stylize Images Using Pre-trained MSG-Net
 0. Download the pre-trained model

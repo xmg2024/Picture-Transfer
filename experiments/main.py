@@ -30,35 +30,35 @@ from option import Options
 device = torch.device('cuda:0')
 
 def main():
-    # figure out the experiments type
+    # Determine the experiment type
     args = Options().parse()
     if args.subcommand is None:
-        raise ValueError("ERROR: specify the experiment type")
+        raise ValueError("ERROR: Please specify the experiment type.")
     if args.cuda and not torch.cuda.is_available():
-        raise ValueError("ERROR: cuda is not available, try running on CPU")
+        raise ValueError("ERROR: CUDA is not available, try running on CPU.")
 
 
     if args.subcommand == "train":
-        # Training the model 
+        # Train the model
         train(args)
 
     elif args.subcommand == 'eval':
-        # Test the pre-trained model
+        # Evaluate the pre-trained model
         evaluate(args)
 
     elif args.subcommand == 'optim':
-        # Gatys et al. using optimization-based approach
+        # Gatys et al. optimization-based approach
         optimize(args)
 
     else:
-        raise ValueError('Unknow experiment type')
+        raise ValueError('Unknown experiment type')
 
 
 def optimize(args):
     """    Gatys et al. CVPR 2017
     ref: Image Style Transfer Using Convolutional Neural Networks
     """
-    # load the content and style target
+    # Load the content and style target images
     content_image = utils.tensor_load_rgbimage(args.content_image, size=args.content_size, keep_asp=True)
     content_image = content_image.unsqueeze(0)
     content_image = Variable(utils.preprocess_batch(content_image), requires_grad=False)
@@ -68,7 +68,7 @@ def optimize(args):
     style_image = Variable(utils.preprocess_batch(style_image), requires_grad=False)
     style_image = utils.subtract_imagenet_mean_batch(style_image)
 
-    # load the pre-trained vgg-16 and extract features
+    # Load the pre-trained VGG-16 and extract features
     vgg = Vgg16()
     utils.init_vgg16(args.vgg_model_dir)
     # vgg.load_state_dict(torch.load(os.path.join(args.vgg_model_dir, "vgg16.weight")))
@@ -80,11 +80,11 @@ def optimize(args):
     f_xc_c = Variable(features_content[1].data, requires_grad=False)
     features_style = vgg(style_image)
     gram_style = [utils.gram_matrix(y) for y in features_style]
-    # init optimizer
+    # Initialize optimizer
     output = Variable(content_image.data, requires_grad=True)
     optimizer = Adam([output], lr=args.lr)
     mse_loss = torch.nn.MSELoss()
-    # optimizing the images
+    # Optimize the images
     tbar = trange(args.iters)
     for e in tbar:
         utils.imagenet_clamp_batch(output, 0, 255)
@@ -101,8 +101,8 @@ def optimize(args):
         total_loss = content_loss + style_loss
         total_loss.backward()
         optimizer.step()
-        tbar.set_description(total_loss.data.cpu().numpy()[0])
-    # save the image    
+        tbar.set_description(str(total_loss.item()))
+    # Save the output image    
     output = utils.add_imagenet_mean_batch(output)
     utils.tensor_save_bgrimage(output.data[0], args.output_image, args.cuda)
 
@@ -158,6 +158,8 @@ def train(args):
                 x = x.cuda()
 
             style_v = style_loader.get(batch_id)
+            # make style_v 和 style_model 在同一设备上
+            style_v = style_v.to(next(style_model.parameters()).device)
             style_model.setTarget(style_v)
 
             style_v = utils.subtract_imagenet_mean_batch(style_v)
@@ -180,8 +182,8 @@ def train(args):
             style_loss = 0.
             for m in range(len(features_y)):
                 gram_y = utils.gram_matrix(features_y[m])
-                gram_s = Variable(gram_style[m].data, requires_grad=False).repeat(args.batch_size, 1, 1, 1)
-                style_loss += args.style_weight * mse_loss(gram_y, gram_s[:n_batch, :, :])
+                gram_s = Variable(gram_style[m].data, requires_grad=False).repeat(n_batch, 1, 1)
+                style_loss += args.style_weight * mse_loss(gram_y, gram_s)
 
             total_loss = content_loss + style_loss
             total_loss.backward()
@@ -201,7 +203,7 @@ def train(args):
 
             
             if (batch_id + 1) % (4 * args.log_interval) == 0:
-                # save model
+                # Save the model
                 style_model.eval()
                 style_model.cpu()
                 save_model_filename = "Epoch_" + str(e) + "iters_" + str(count) + "_" + \
@@ -211,9 +213,9 @@ def train(args):
                 torch.save(style_model.state_dict(), save_model_path)
                 style_model.train()
                 style_model.cuda()
-                tbar.set_description("\nCheckpoint, trained model saved at", save_model_path)
+                tbar.set_description("\nCheckpoint: trained model saved at " + save_model_path)
 
-    # save model
+    # Save the model
     style_model.eval()
     style_model.cpu()
     save_model_filename = "Final_epoch_" + str(args.epochs) + "_" + \
@@ -222,7 +224,7 @@ def train(args):
     save_model_path = os.path.join(args.save_model_dir, save_model_filename)
     torch.save(style_model.state_dict(), save_model_path)
 
-    print("\nDone, trained model saved at", save_model_path)
+    print("\nDone: trained model saved at", save_model_path)
 
 
 def check_paths(args):
@@ -267,7 +269,7 @@ def evaluate(args):
 
 
 def fast_evaluate(args, basedir, contents, idx = 0):
-    # basedir to save the data
+    # Base directory to save the data
     style_model = Net(ngf=args.ngf)
     style_model.load_state_dict(torch.load(args.model), False)
     style_model.eval()

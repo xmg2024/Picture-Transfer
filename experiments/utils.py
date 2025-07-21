@@ -14,6 +14,7 @@ import torch
 from PIL import Image
 from torch.autograd import Variable
 import torchvision.models as models
+from torchvision.models import VGG16_Weights
 
 from net import Vgg16
 
@@ -59,16 +60,16 @@ def gram_matrix(y):
 
 def subtract_imagenet_mean_batch(batch):
     """Subtract ImageNet mean pixel-wise from a BGR image."""
-    tensortype = type(batch.data)
-    mean = tensortype(batch.data.size())
+    mean = torch.zeros_like(batch)
     mean[:, 0, :, :] = 103.939
     mean[:, 1, :, :] = 116.779
     mean[:, 2, :, :] = 123.680
-    return batch - Variable(mean)
+    mean = mean.to(batch.device)
+    return batch - mean
 
 
 def add_imagenet_mean_batch(batch):
-    """Add ImageNet mean pixel-wise from a BGR image."""
+    """Add ImageNet mean pixel-wise to a BGR image."""
     tensortype = type(batch.data)
     mean = tensortype(batch.data.size())
     mean[:, 0, :, :] = 103.939
@@ -91,7 +92,7 @@ def preprocess_batch(batch):
 
 
 def init_vgg16(model_folder):
-    vgg = models.vgg16(pretrained=True).features
+    vgg = models.vgg16(weights=VGG16_Weights.IMAGENET1K_V1).features
     vgg = vgg.eval()
     return vgg
 
